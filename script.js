@@ -6,7 +6,7 @@ const CONFIG = {
   text1: "I",
   text2: "MISS YOU",
   text3: "❤️",
-  text4: "I MISS YOU ❤️",
+  text4: "I MISS YOU",
   particleSize: 0.08,
   scatterRadius: 35,
   textScale: 0.055,
@@ -43,6 +43,8 @@ const state = {
   handPositions: [],
   isHandDetected: false,
   musicActivated: false,
+  heartGestureStart: 0,
+  isViewLocked: false,
 };
 
 /**
@@ -317,20 +319,20 @@ function getHeartPoint() {
   // Lấy mẫu từ chối cho khối lượng trái tim 3D
   // Công thức: (x^2 + 9/4y^2 + z^2 - 1)^3 - x^2z^3 - 9/80y^2z^3 < 0
   // "y" trong công thức này thường là "độ sâu" hoặc độ dày nếu z hướng lên.
-  
+
   let x, y, z;
   while (true) {
     // Tìm kiếm trong khối lập phương
     x = (Math.random() - 0.5) * 3;
     y = (Math.random() - 0.5) * 3;
     z = (Math.random() - 0.5) * 3;
-    
-    const a = x * x + (9/4) * y * y + z * z - 1;
+
+    const a = x * x + (9 / 4) * y * y + z * z - 1;
     const b = x * x * z * z * z;
-    const c = (9/80) * y * y * z * z * z;
-    
+    const c = (9 / 80) * y * y * z * z * z;
+
     if (a * a * a - b - c < 0) {
-      // Thành công
+    
       return new THREE.Vector3(x, y, z);
     }
   }
@@ -338,19 +340,19 @@ function getHeartPoint() {
 
 for (let i = 0; i < heartParticleCount; i++) {
   const p = getHeartPoint();
-  
+
   // Định hướng và Tỷ lệ Tinh chỉnh cho "Cân bằng và Đẹp"
   // Công thức có 'z' là trục dọc (đỉnh ở trên).
   // 'x' là chiều rộng.
   // 'y' là độ sâu.
-  
+
   // Chúng ta ánh xạ:
   // THREE.x = Math.x * giãn_rộng
   // THREE.y = Math.z * giãn_cao
   // THREE.z = Math.y * làm_phẳng (trái tim thường phẳng hơn)
-  
+
   const scale = 16.0;
-  
+
   const rotX = p.x * scale * 1.2; // Mở rộng một chút
   const rotY = p.z * scale * 1.2; // Chiều cao
   const rotZ = p.y * scale * 0.6; // Làm phẳng hồ sơ
@@ -371,7 +373,10 @@ for (let i = 0; i < heartParticleCount; i++) {
   heartColors[i * 3 + 2] = color.b;
 }
 
-heartGeometry.setAttribute("position", new THREE.BufferAttribute(heartPositions, 3));
+heartGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(heartPositions, 3)
+);
 heartGeometry.setAttribute("color", new THREE.BufferAttribute(heartColors, 3));
 
 const heartMaterial = new THREE.PointsMaterial({
@@ -534,24 +539,52 @@ function onResults(results) {
       else if (fCount === 2) detectedGesture = 2;
       else if (fCount === 3) detectedGesture = 3;
       else if (fCount === 4) detectedGesture = 4;
-      
+
       // Kiểm tra Cử chỉ Trái tim (Cần 2 tay)
       const isHeart = detectHeartGesture(results);
-
       const cardLayer = document.getElementById("card-layer");
 
+      // LOGIC MỚI: Khóa Heart (3 giây) & Mở khóa Fist
       if (isHeart) {
-        // Hiện Thẻ
-        if (cardLayer) cardLayer.classList.add("visible");
-        state.targetGestureLabel = "Heart Gesture: I MISS YOU";
-        state.spreadTarget = 1.0; 
-        state.galaxyEffectActive = false;
-        state.scatterScaleTarget = 1.5; 
+        if (state.heartGestureStart === 0) {
+          state.heartGestureStart = Date.now();
+        } else if (Date.now() - state.heartGestureStart > 2000) {
+          state.isViewLocked = true;
+        }
+      } else {
+        state.heartGestureStart = 0;
       }
-      else if (detectedGesture > 0) {
+
+      // Xử lý mở khóa bằng nắm tay (Fist)
+      if (state.isViewLocked && fCount === 0) {
+        state.isViewLocked = false;
+      }
+
+      if (state.isViewLocked) {
+        // ĐANG KHÓA: Luôn hiện thẻ
+        if (cardLayer) cardLayer.classList.add("visible");
+        state.targetGestureLabel = "LOCKED (Fist to Close)";
+        state.spreadTarget = 1.0;
+        state.galaxyEffectActive = false;
+        state.scatterScaleTarget = 1.5;
+      } else if (isHeart) {
+        // Đang giữ tim nhưng chưa đủ 2s (hoặc chưa khóa)
+        // KHÔNG hiện thẻ, nhưng hiện tiến trình
+        if (cardLayer) cardLayer.classList.remove("visible");
+        const progress = Math.min(
+          (Date.now() - state.heartGestureStart) / 2000,
+          1
+        );
+        state.targetGestureLabel = `Holding Heart... ${Math.floor(
+          progress * 100
+        )}%`;
+        state.spreadTarget = 1.0;
+        state.galaxyEffectActive = false;
+        state.scatterScaleTarget = 1.5;
+      } else if (detectedGesture > 0) {
         // Ẩn Thẻ
         if (cardLayer) cardLayer.classList.remove("visible");
-        
+
         state.targetGestureLabel = getLabel(detectedGesture);
         state.spreadTarget = 0.0;
         state.targetWeights = getWeights(detectedGesture);
@@ -599,12 +632,11 @@ function onResults(results) {
     // Kích hoạt nhạc khi phát hiện tay LẦN ĐẦU.
     // Khi đã kích hoạt, nó sẽ bật mãi mãi (vòng lặp được bật trong HTML).
     if (state.isHandDetected && !state.musicActivated) {
-        state.musicActivated = true;
-        bgMusic.play().catch(e => {
-            console.log("Phát nhạc bị chặn:", e);
-            // Nếu bị chặn, đặt lại cờ để thử lại ở khung hình tiếp theo
-            state.musicActivated = false;
-        });
+      state.musicActivated = true;
+      bgMusic.play().catch((e) => {
+        console.log("Phát nhạc bị chặn:", e);
+        state.musicActivated = false;
+      });
     }
   }
 
@@ -685,7 +717,7 @@ function detectHeartGesture(results) {
 
   // Ngưỡng "chạm" (0.05 là ~5% chiều rộng/cao màn hình)
   // Kiểm tra nếu CẢ HAI ngón trỏ gần nhau VÀ CẢ HAI ngón cái gần nhau
-  const threshold = 0.08; 
+  const threshold = 0.08;
 
   if (distIndices < threshold && distThumbs < threshold) {
     return true;
@@ -1155,17 +1187,18 @@ function animate() {
   // ==========================
   // LOGIC TRÁI TIM & CHUYỂN ĐỔI
   // ==========================
-  
-  const showHeart = state.isHandDetected && state.fingerCount === 0 && !state.voiceModeActive;
-  
+
+  const showHeart =
+    state.isHandDetected && state.fingerCount === 0 && !state.voiceModeActive;
+
   // 1. Quản lý Tỷ lệ Hệ thống Hạt (Hình cầu)
   // Nếu hiển thị trái tim, chúng ta muốn hình cầu thu nhỏ về 0.
   // Nếu không hiển thị trái tim, chúng ta muốn nó là 1.
   const targetSphereScale = showHeart ? 0.0 : 1.0;
-  
+
   // Nội suy mượt mà tỷ lệ hình cầu
   // truy cập trực tiếp vào tỷ lệ đối tượng three.js
-  const curScale = particleSystem.scale.x; 
+  const curScale = particleSystem.scale.x;
   const newScale = THREE.MathUtils.lerp(curScale, targetSphereScale, 0.08);
   particleSystem.scale.setScalar(newScale);
 
@@ -1174,40 +1207,45 @@ function animate() {
   // Khi biến mất, làm mờ trái tim trước, sau đó hình cầu sẽ lớn lên (kết quả tự nhiên của việc targetSphereScale trở thành 1)
   let targetHeartOpacity = 0.0;
   if (showHeart) {
-      if (newScale < 0.2) {
-          targetHeartOpacity = 0.9;
-      }
+    if (newScale < 0.2) {
+      targetHeartOpacity = 0.9;
+    }
   } else {
-      // Làm mờ ngay lập tức nếu không phải chế độ trái tim
-      targetHeartOpacity = 0.0;
+    // Làm mờ ngay lập tức nếu không phải chế độ trái tim
+    targetHeartOpacity = 0.0;
   }
-  
-  heartMaterial.opacity = THREE.MathUtils.lerp(heartMaterial.opacity, targetHeartOpacity, 0.1);
+
+  heartMaterial.opacity = THREE.MathUtils.lerp(
+    heartMaterial.opacity,
+    targetHeartOpacity,
+    0.1
+  );
   heartSystem.visible = heartMaterial.opacity > 0.01;
 
   if (heartSystem.visible) {
     // Hoạt hình Nhịp tim
-    const beatStrength = Math.pow(Math.sin(time * 3), 63) * 0.3 + Math.pow(Math.sin(time * 3 + 0.8), 20) * 0.1;
+    const beatStrength =
+      Math.pow(Math.sin(time * 3), 63) * 0.3 +
+      Math.pow(Math.sin(time * 3 + 0.8), 20) * 0.1;
     const scaleFactor = 1.0 + 0.15 * Math.sin(time * 6);
-    
+
     // Đồng bộ Xoay
     heartSystem.rotation.y = particleSystem.rotation.y;
     heartSystem.rotation.x = particleSystem.rotation.x;
 
     // Cập nhật hạt cho nhịp đập
     const hPos = heartGeometry.attributes.position.array;
-    for(let i=0; i<heartParticleCount; i++) {
-        const base = heartBasePositions[i];
-        hPos[i*3] = base.x * scaleFactor;
-        hPos[i*3+1] = base.y * scaleFactor;
-        hPos[i*3+2] = base.z * scaleFactor;
+    for (let i = 0; i < heartParticleCount; i++) {
+      const base = heartBasePositions[i];
+      hPos[i * 3] = base.x * scaleFactor;
+      hPos[i * 3 + 1] = base.y * scaleFactor;
+      hPos[i * 3 + 2] = base.z * scaleFactor;
     }
     heartGeometry.attributes.position.needsUpdate = true;
   }
-  
+
   // Buộc Thiên Hà mờ dần trong chế độ trái tim, nếu chưa mờ
   if (showHeart) galaxyMaterial.opacity *= 0.9;
-
 
   controls.update();
   renderer.render(scene, camera);

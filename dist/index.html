@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hand Gesture Particle System</title>
-    <link rel="stylesheet" href="styles.css" />
 
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -27,6 +26,7 @@
       src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"
       crossorigin="anonymous"
     ></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Blu5rGcN.css">
   </head>
   <body>
     <div id="loading">
@@ -37,7 +37,7 @@
 
     <!-- Nhạc nền (Người dùng phải thêm 'music.mp3' vào thư mục gốc hoặc thư mục audio) -->
     <audio id="bg-music" loop>
-      <source src="./mp3/snaptik.vn_Kj49i.mp3" type="audio/mp3" />
+      <source src="/assets/snaptik.vn_Kj49i-CKeNLm46.mp3" type="audio/mp3" />
     </audio>
 
     <div id="ui-layer">
@@ -70,12 +70,15 @@
         />
         <div style="font-size: 11px; color: #ddd; pointer-events: none">
           <b>Chế độ Giọng nói BẬT:</b><br />
-          🎤 Nói từ tiếng anh BẤT KỲ<br />
-          👋 Múa<br />
+          🎤 Nói BẤT KỲ từ nào<br />
+          👋 Chạm vào văn bản để phân tán<br />
           <br />
           <b>Chế độ Giọng nói TẮT:</b><br />
-          ☝️ 1  ✌️ 2  🤟 3<br />
-          ✋ 4  ✊ 5  🫶 2s<br/>
+          ☝️ 1: "I"<br />
+          ✌️ 2: "MISS YOU"<br />
+          🤟 3: "❤️"<br />
+          ✋ 4: "I MISS YOU ❤️"<br />
+          ✊ Nắm tay: Thu nhỏ 🫶 FOR YOU
         </div>
       </div>
     </div>
@@ -85,24 +88,24 @@
       <div id="drag-container">
         <div id="spin-container">
           <!-- Thêm hình ảnh (hoặc video) của bạn vào đây -->
-          <img src="./image/_ (1).jpeg" alt="" />
+          <img src="/assets/_%20(1)-Qw7_Z1ZC.jpeg" alt="" />
           <video controls autoplay="autoplay" loop muted>
-            <source src="./video/snaptik.vn_9OfzA.mp4" type="video/mp4" />
+            <source src="/assets/snaptik.vn_9OfzA-orOJ6id6.mp4" type="video/mp4" />
           </video>
 
-          <img src="./image/_ (2).jpeg" alt="" />
+          <img src="/assets/_%20(2)-CUKnBBo_.jpeg" alt="" />
           <video controls autoplay="autoplay" loop muted>
-            <source src="./video/snaptik.vn_NQAVg.mp4" type="video/mp4" />
+            <source src="/assets/snaptik.vn_NQAVg-DCaE_ndm.mp4" type="video/mp4" />
           </video>
 
-          <img src="./image/Violet Evergarden (1).jpeg" alt="" />
+          <img src="/assets/Violet%20Evergarden%20(1)-DeSdGFdP.jpeg" alt="" />
           <video controls autoplay="autoplay" loop muted>
-            <source src="./video/snaptik.vn_uZ97N.mp4" type="video/mp4" />
+            <source src="/assets/snaptik.vn_uZ97N-B_SBTbCk.mp4" type="video/mp4" />
           </video>
 
-          <img src="./image/Violet Evergarden.jpeg" alt="" />
+          <img src="/assets/Violet%20Evergarden-C6A5z75r.jpeg" alt="" />
           <video controls autoplay="autoplay" loop muted>
-            <source src="./video/snaptik.vn_zWWtB.mp4" type="video/mp4" />
+            <source src="/assets/snaptik.vn_zWWtB-Be_AOdTq.mp4" type="video/mp4" />
           </video>
           <div class="loader">
             <div class="cardHover">
