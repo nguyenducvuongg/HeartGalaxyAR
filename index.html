@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hand Gesture Particle System</title>
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- MediaPipe Hands -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      /* Sửa lỗi 404 cho GitHub Pages */
+    </style>
+  </head>
+  <body>
+    <div id="loading">
+      Đang khởi động hệ thống...<br /><span style="font-size: 14px; color: #aaa"
+        >Cho phép Camera & Micro</span
+      >
+    </div>
+
+    <!-- Nhạc nền (Người dùng phải thêm 'music.mp3' vào thư mục gốc hoặc thư mục audio) -->
+    <audio id="bg-music" loop>
+      <source src="./mp3/snaptik.vn_bwl2Q.mp3" type="audio/mp3" />
+    </audio>
+
+    <div id="ui-layer">
+      <div class="ui-header-row">
+        <h1>Điều khiển</h1>
+        <button id="btn-collapse">−</button>
+      </div>
+
+      <div id="ui-content">
+        <button id="btn-voice">
+          <div id="voice-indicator"></div>
+          <span id="voice-btn-text">Bật Chế độ Giọng nói</span>
+        </button>
+
+        <div class="stat-row">
+          <span>Cử chỉ/Từ:</span>
+          <span id="gesture-val" class="value">...</span>
+        </div>
+        <div class="stat-row">
+          <span>Ngón tay:</span>
+          <span id="finger-val" class="value">0</span>
+        </div>
+
+        <hr
+          style="
+            border: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 5px 0;
+          "
+        />
+        <div style="font-size: 11px; color: #ddd; pointer-events: none">
+          <b>Chế độ Giọng nói BẬT:</b><br />
+          🎤 Nói BẤT KỲ từ nào<br />
+          👋 Chạm vào văn bản để phân tán<br />
+          <br />
+          <b>Chế độ Giọng nói TẮT:</b><br />
+          ☝️ 1: "I"<br />
+          ✌️ 2: "MISS YOU"<br />
+          🤟 3: "❤️"<br />
+          ✋ 4: "I MISS YOU ❤️"<br />
+          ✊ Nắm tay: Thu nhỏ
+          🫶 FOR YOU
+        </div>
+      </div>
+    </div>
+
+    <!-- Lớp Thẻ (Mặc định ẩn) -->
+    <div id="card-layer">
+      <div id="drag-container">
+        <div id="spin-container">
+          <!-- Thêm hình ảnh (hoặc video) của bạn vào đây -->
+          <img src="image/17b5e0a8415ba005f94a.jpg" alt="" />
+          <video controls autoplay="autoplay" loop muted>
+            <source src="video/1406231470679875873.mp4" type="video/mp4" />
+          </video>
+          
+          <img src="image/350a25a53e4ee810b15f (1).jpg" alt="" />
+          <video controls autoplay="autoplay" loop muted>
+            <source src="video/5565664229908157655.mp4" type="video/mp4" />
+          </video>
+
+          <img src="image/512d73a0504b8615df5a.jpg" alt="" />
+          <video controls autoplay="autoplay" loop muted>
+            <source src="video/7272555975290414993.mp4" type="video/mp4" />
+          </video>
+
+          <img src="image/68195d0d479d90c3c98c.jpg" alt="" />
+          <img src="image/94ee8eb4885f5e01074e.jpg" alt="" />
+          <div class="loader">
+            <div class="cardHover">
+              <div class="inner one" style="--i: 1"></div>
+              <div class="inner two" style="--i: 1"></div>
+              <div class="inner three" style="--i: 1"></div>
+              <div class="box-heart">
+                <div class="heart"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="ground"></div>
+      </div>
+    </div>
+
+    <!-- Khung bao Camera để Kéo & Thay đổi kích thước -->
+    <div id="camera-wrapper">
+      <div id="camera-handle">:: Kéo để Di chuyển ::</div>
+      <video id="webcam-preview" playsinline></video>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
