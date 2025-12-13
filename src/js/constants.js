@@ -1,9 +1,9 @@
 export const CONFIG = {
   particleCount: 40000,
-  text1: "I",
-  text2: "MISS YOU",
-  text3: "❤️",
-  text4: "I MISS YOU",
+  text1: "Hey",
+  text2: "I wanna tell u",
+  text3: "I miss u",
+  text4: "And u ?",
   particleSize: 0.08,
   scatterRadius: 35,
   textScale: 0.055,
