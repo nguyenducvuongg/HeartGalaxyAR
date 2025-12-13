@@ -45,10 +45,10 @@ Sau khi cấp quyền truy cập Camera, hệ thống sẽ bắt đầu nhận d
 
 | Cử chỉ               | Hành động / Hiệu ứng                                 |
 | :------------------- | :--------------------------------------------------- |
-| 1 Ngón tay       | Hiển thị chữ "I"                                     |
-| 2 Ngón tay       | Hiển thị chữ "MISS YOU"                              |
-| 3 Ngón tay       | Hiển thị biểu tượng "❤️"                             |
-| 4 Ngón tay       | Hiển thị "I MISS YOU"                                |
+| 1 Ngón tay       | Hiển thị chữ "Hey"                                     |
+| 2 Ngón tay       | Hiển thị chữ "I Wanna tell u"                              |
+| 3 Ngón tay       | Hiển thị "I MISS U"                            |
+| 4 Ngón tay       | Hiển thị "And u ?"                                |
 | Trái Tim (2 Tay) | Giữ 2 giây để hiện khung ảnh kỷ niệm (Lock View) |
 | Nắm Tay (Fist)   | Đóng khung ảnh kỷ niệm (Unlock View)                 |
 | Mở rộng tay      | Phân tán các hạt (Scatter Effect)                    |
