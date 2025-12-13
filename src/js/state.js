@@ -23,6 +23,13 @@ export const state = {
   handPositions: [],
   isHandDetected: false,
   musicActivated: false,
+
+  // Black Hole Effect
+  blackHoleStart: 0,        // Timestamp when fist started
+  blackHoleActive: false,   // Is black hole gravitational pull active
+  bigBangActive: false,     // Is explosion active
+  bigBangStart: 0,          // Explosion start time
+  heartPersistent: false,   // Heart should stay visible after explosion
   heartGestureStart: 0,
   isViewLocked: false,
 };

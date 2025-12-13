@@ -41,6 +41,20 @@ setupUI(updateUI);
 setupVoice();
 initCardSystem();
 
+// === BLACK HOLE RING MESH ===
+const ringGeometry = new THREE.RingGeometry(0.5, 1, 64);
+const ringMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffffff,
+  side: THREE.DoubleSide,
+  transparent: true,
+  opacity: 0.6,
+});
+const blackHoleRing = new THREE.Mesh(ringGeometry, ringMaterial);
+blackHoleRing.position.set(0, 0, 0);
+blackHoleRing.rotation.x = Math.PI / 2; // Face camera
+blackHoleRing.visible = false;
+scene.add(blackHoleRing);
+
 // === CAMERA SETUP ===
 const videoElement = document.getElementById("webcam-preview");
 const loading = document.getElementById("loading");
@@ -306,6 +320,116 @@ function animate() {
       }
     }
 
+    // 5. BLACK HOLE EFFECT: Realistic Gravitational Pull (Interstellar-style)
+    if (state.blackHoleActive) {
+      const centerX = 0;
+      const centerY = 0;
+      const centerZ = 0;
+      
+      const dx = centerX - finalX;
+      const dy = centerY - finalY;
+      const dz = centerZ - finalZ;
+      const distSq = dx * dx + dy * dy + dz * dz;
+      const dist = Math.sqrt(distSq) + 0.001; // Very small epsilon for extreme pull
+      
+      // Time-based progression for dramatic buildup
+      const elapsed = Date.now() - state.blackHoleStart;
+      const progress = Math.min(elapsed / 3000, 1);
+      
+      // ENHANCED GRAVITY: Much stronger pull with exponential growth
+      // Starts at 100, grows exponentially to 500 at full power
+      const gravitationalConstant = 100 * Math.pow(5, progress); // 100 -> 500
+      
+      // Inverse square law with enhanced close-range attraction
+      // Particles very close to center get sucked in extremely fast
+      const gravity = gravitationalConstant / (dist * dist + 0.1);
+      
+      // Event horizon effect: extreme pull when very close
+      const eventHorizonRadius = 3;
+      let eventHorizonBoost = 1;
+      if (dist < eventHorizonRadius) {
+        eventHorizonBoost = 1 + (eventHorizonRadius - dist) * 2;
+      }
+      
+      // Radial inward force with event horizon boost
+      const radialForceX = (dx / dist) * gravity * eventHorizonBoost;
+      const radialForceY = (dy / dist) * gravity * eventHorizonBoost;
+      const radialForceZ = (dz / dist) * gravity * eventHorizonBoost;
+      
+      // ENHANCED ORBITAL MOTION: Faster rotation for dramatic spiral
+      // Tangential velocity perpendicular to radial direction
+      const tangentialX = -dy;
+      const tangentialY = dx;
+      const tangentialZ = 0;
+      
+      // Normalize tangential vector
+      const tangentialMag = Math.sqrt(tangentialX * tangentialX + tangentialY * tangentialY) + 0.01;
+      const tangentialNormX = tangentialX / tangentialMag;
+      const tangentialNormY = tangentialY / tangentialMag;
+      
+      // Orbital velocity: faster as particles approach center (Kepler + boost)
+      // Increases dramatically with progress for intense spin
+      const orbitalSpeed = Math.sqrt(gravitationalConstant / dist) * (1.2 + progress * 0.8);
+      
+      const orbitalForceX = tangentialNormX * orbitalSpeed;
+      const orbitalForceY = tangentialNormY * orbitalSpeed;
+      
+      // Combine forces: radial pull + orbital rotation = spiral accretion
+      finalX += radialForceX + orbitalForceX;
+      finalY += radialForceY + orbitalForceY;
+      finalZ += radialForceZ;
+      
+      // Add Z-axis compression (flattening into disk)
+      finalZ *= 0.95;
+      
+      // Enhanced turbulence for chaotic accretion disk
+      const turbulenceStrength = 0.5 * progress;
+      const turbulence1 = Math.sin(time * 3 + i * 0.1) * turbulenceStrength;
+      const turbulence2 = Math.cos(time * 2.5 + i * 0.15) * turbulenceStrength;
+      finalX += turbulence1 * Math.cos(i * 0.5);
+      finalY += turbulence2 * Math.sin(i * 0.5);
+    }
+
+    // 6. BIG BANG EFFECT: Radial Explosion with Shockwave
+    if (state.bigBangActive) {
+      const bangElapsed = Date.now() - state.bigBangStart;
+      
+      if (bangElapsed < 2000) {
+        // Extended explosion phase (2 seconds for more drama)
+        const progress = bangElapsed / 2000;
+        
+        // Push particles outward from center
+        const dx = finalX;
+        const dy = finalY;
+        const dz = finalZ;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) + 0.1;
+        
+        // Multi-phase explosion for realism
+        let explosionStrength;
+        if (progress < 0.3) {
+          // Initial massive burst (first 600ms)
+          explosionStrength = 100 * (1 - progress / 0.3);
+        } else if (progress < 0.7) {
+          // Sustained shockwave (600-1400ms)
+          explosionStrength = 40 * Math.sin((progress - 0.3) * Math.PI / 0.4);
+        } else {
+          // Decay phase (1400-2000ms)
+          explosionStrength = 20 * (1 - (progress - 0.7) / 0.3);
+        }
+        
+        // Add radial velocity with some randomness
+        const randomFactor = 1 + (Math.random() - 0.5) * 0.3;
+        finalX += (dx / dist) * explosionStrength * randomFactor;
+        finalY += (dy / dist) * explosionStrength * randomFactor;
+        finalZ += (dz / dist) * explosionStrength * randomFactor;
+        
+        // Add rotation during explosion for chaos
+        const rotationSpeed = explosionStrength * 0.05;
+        finalX += Math.sin(time * 3 + i) * rotationSpeed;
+        finalY += Math.cos(time * 3 + i) * rotationSpeed;
+      }
+    }
+
     // Cập nhật Vị trí
     const cx = positionsArray[i * 3];
     const cy = positionsArray[i * 3 + 1];
@@ -319,7 +443,41 @@ function animate() {
     const baseColor = new THREE.Color();
     const cBlueNeon = new THREE.Color(0x00ffff); // Cyan for AR
     
-    if (state.currentSpread > 0.8) {
+    // BLACK HOLE COLOR EFFECT: Gravitational redshift + accretion disk glow
+    if (state.blackHoleActive || state.bigBangActive) {
+      const distFromCenter = Math.sqrt(finalX * finalX + finalY * finalY + finalZ * finalZ);
+      const normalizedDist = Math.min(distFromCenter / 30, 1);
+      
+      if (state.blackHoleActive) {
+        // Accretion disk colors: hot white/blue near center, orange/red at edges
+        if (normalizedDist < 0.15) {
+          // Event horizon region: intense white/blue
+          const intensity = 1 - (normalizedDist / 0.15);
+          baseColor.setRGB(
+            0.8 + intensity * 0.2,  // White
+            0.9 + intensity * 0.1,
+            1.0
+          );
+        } else if (normalizedDist < 0.4) {
+          // Inner accretion disk: blue-white
+          const t = (normalizedDist - 0.15) / 0.25;
+          baseColor.setHSL(0.55, 0.8, 0.7 + (1 - t) * 0.3);
+        } else {
+          // Outer accretion disk: orange to red
+          const t = (normalizedDist - 0.4) / 0.6;
+          baseColor.setHSL(0.05 + t * 0.05, 1.0, 0.5 + (1 - t) * 0.2);
+        }
+        
+        // Add some flickering for realism
+        const flicker = Math.sin(time * 5 + i * 0.5) * 0.1;
+        baseColor.offsetHSL(0, 0, flicker);
+      } else if (state.bigBangActive) {
+        // Explosion colors: intense white/yellow
+        const bangElapsed = Date.now() - state.bigBangStart;
+        const bangProgress = Math.min(bangElapsed / 1000, 1);
+        baseColor.setHSL(0.15, 1.0, 0.9 - bangProgress * 0.4);
+      }
+    } else if (state.currentSpread > 0.8) {
       // Scatter Color
       const dist = Math.sqrt(
         finalX * finalX + finalY * finalY + finalZ * finalZ
@@ -351,6 +509,46 @@ function animate() {
   particleGeometry.attributes.position.needsUpdate = true;
   particleGeometry.attributes.color.needsUpdate = true;
 
+  // === BLACK HOLE RING VISUAL ===
+  if (blackHoleRing) {
+    if (state.blackHoleActive) {
+      // Show ring and shrink over 3 seconds
+      const elapsed = Date.now() - state.blackHoleStart;
+      const progress = Math.min(elapsed / 3000, 1);
+      blackHoleRing.visible = true;
+      const scale = 1 - progress; // from 1 to 0
+      blackHoleRing.scale.set(scale, scale, 1);
+      blackHoleRing.material.opacity = 0.6 * (1 - progress);
+    } else if (state.bigBangActive) {
+      // Explosion: ring expands quickly then disappears
+      const bangElapsed = Date.now() - state.bigBangStart;
+      if (bangElapsed < 1000) {
+        const progress = bangElapsed / 1000;
+        blackHoleRing.visible = true;
+        const scale = progress * 3; // expand to 3x
+        blackHoleRing.scale.set(scale, scale, 1);
+        blackHoleRing.material.opacity = 0.6 * (1 - progress);
+      } else {
+        blackHoleRing.visible = false;
+      }
+    } else {
+      blackHoleRing.visible = false;
+    }
+  }
+
+  // === PARTICLE VISIBILITY (Big Bang) ===
+  if (state.bigBangActive) {
+    const bangElapsed = Date.now() - state.bigBangStart;
+    if (bangElapsed >= 1000) {
+      // Hide particles after 1s to reveal heart
+      particleSystem.visible = false;
+    } else {
+      particleSystem.visible = true;
+    }
+  } else {
+    particleSystem.visible = true;
+  }
+
   // Hoạt hình Thiên Hà (Độ mờ khớp với Cử chỉ 4)
   galaxyMaterial.opacity = THREE.MathUtils.lerp(
     galaxyMaterial.opacity,
@@ -363,7 +561,8 @@ function animate() {
   // ==========================
 
   const showHeart =
-    state.isHandDetected && state.fingerCount === 0 && !state.voiceModeActive;
+    (state.isHandDetected && state.fingerCount === 0 && !state.voiceModeActive && !state.blackHoleActive && !state.bigBangActive) ||
+    state.heartPersistent;
 
   // 1. Quản lý Tỷ lệ Hệ thống Hạt (Hình cầu)
   const targetSphereScale = showHeart ? 0.0 : 1.0;

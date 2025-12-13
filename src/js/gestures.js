@@ -143,13 +143,70 @@ export function onResults(results) {
         // Ẩn Thẻ
         if (cardLayer) cardLayer.classList.remove("visible");
 
-        state.targetGestureLabel =
-          fCount === 0 ? "Fist (Contract)" : "Scatter (Expand)";
-        state.spreadTarget = 1.0;
-        state.galaxyEffectActive = false;
-        const minScale = 0.1;
-        const maxScale = 1.5;
-        state.scatterScaleTarget = minScale + openness * (maxScale - minScale);
+        // BLACK HOLE EFFECT: Fist gesture tracking
+        if (fCount === 0) {
+          // Fist detected
+          if (state.blackHoleStart === 0) {
+            // Start black hole timer
+            state.blackHoleStart = Date.now();
+            state.blackHoleActive = true;
+            state.bigBangActive = false;
+            state.heartPersistent = false;
+          } else {
+            const elapsed = Date.now() - state.blackHoleStart;
+            if (elapsed >= 3000 && !state.bigBangActive) {
+              // Trigger Big Bang after 3 seconds
+              state.bigBangActive = true;
+              state.bigBangStart = Date.now();
+              state.blackHoleActive = false;
+              
+              // Play explosion sound effect
+              const explosionSound = new Audio('/mp3/explosion-fx-343683.mp3');
+              explosionSound.volume = 0.8;
+              explosionSound.play().catch(e => console.log('Sound play blocked:', e));
+            }
+          }
+
+          // Update label based on phase
+          if (state.bigBangActive) {
+            const bangElapsed = Date.now() - state.bigBangStart;
+            if (bangElapsed < 1000) {
+              state.targetGestureLabel = "⚡ BIG BANG! ⚡";
+            } else {
+              state.targetGestureLabel = "Heart Forming...";
+              state.heartPersistent = true;
+            }
+          } else {
+            const progress = Math.min((Date.now() - state.blackHoleStart) / 3000, 1);
+            state.targetGestureLabel = `Black Hole... ${Math.floor(progress * 100)}%`;
+          }
+          
+          state.spreadTarget = 1.0;
+          state.galaxyEffectActive = false;
+          const minScale = 0.1;
+          const maxScale = 1.5;
+          state.scatterScaleTarget = minScale + openness * (maxScale - minScale);
+        } else {
+          // Not a fist - reset black hole state if not in persistent heart mode
+          if (!state.heartPersistent) {
+            state.blackHoleStart = 0;
+            state.blackHoleActive = false;
+            state.bigBangActive = false;
+          } else {
+            // Any other gesture removes persistent heart
+            state.heartPersistent = false;
+            state.blackHoleStart = 0;
+            state.blackHoleActive = false;
+            state.bigBangActive = false;
+          }
+
+          state.targetGestureLabel = "Scatter (Expand)";
+          state.spreadTarget = 1.0;
+          state.galaxyEffectActive = false;
+          const minScale = 0.1;
+          const maxScale = 1.5;
+          state.scatterScaleTarget = minScale + openness * (maxScale - minScale);
+        }
       }
     }
 
