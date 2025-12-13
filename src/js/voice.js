@@ -85,7 +85,7 @@ export function setupVoice() {
               state.spreadTarget = 0.0;
               state.targetWeights = [0, 0, 0, 0, 1];
 
-              updateDynamicText("HELLO");
+              updateDynamicText("TELL ME SOMETHING");
             } catch (e) {
               console.warn(e);
             }
