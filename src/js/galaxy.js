@@ -41,5 +41,5 @@ export const galaxyMaterial = new THREE.PointsMaterial({
 export const galaxySystem = new THREE.Points(galaxyGeo, galaxyMaterial);
 
 export function initGalaxy(scene) {
-    scene.add(galaxySystem);
+  scene.add(galaxySystem);
 }
